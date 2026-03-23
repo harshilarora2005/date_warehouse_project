@@ -1,3 +1,4 @@
+
 CREATE OR REPLACE PROCEDURE silver.load_silver()
 LANGUAGE plpgsql
 AS $$
@@ -9,6 +10,15 @@ DECLARE
 BEGIN
     batch_start_time := clock_timestamp();
     RAISE NOTICE 'Loading Silver Layer Started';
+
+    -- =====================================================
+    -- CRM CUSTOMER INFO
+    -- Cleaning:
+    -- - removes duplicate customer records (keeps latest)
+    -- - trims name fields
+    -- - standardizes marital status codes
+    -- - standardizes gender values
+    -- =====================================================
 
     start_time := clock_timestamp();
 
@@ -51,6 +61,15 @@ BEGIN
     RAISE NOTICE 'crm_cust_info loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
 
+    -- =====================================================
+    -- CRM PRODUCT INFO
+    -- Cleaning:
+    -- - extracts category id from product key
+    -- - normalizes product line labels
+    -- - replaces null cost with zero
+    -- - derives valid end date using lead window logic
+    -- =====================================================
+
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.crm_prd_info;
@@ -84,6 +103,16 @@ BEGIN
 
     end_time := clock_timestamp();
     RAISE NOTICE 'crm_prd_info loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
+
+
+    -- =====================================================
+    -- CRM SALES DETAILS
+    -- Cleaning:
+    -- - converts integer dates into real dates
+    -- - invalid dates become NULL
+    -- - recalculates incorrect sales values
+    -- - fixes missing/invalid prices
+    -- =====================================================
 
     start_time := clock_timestamp();
 
@@ -132,6 +161,15 @@ BEGIN
     end_time := clock_timestamp();
     RAISE NOTICE 'crm_sales_details loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
+
+    -- =====================================================
+    -- ERP CUSTOMER
+    -- Cleaning:
+    -- - removes NAS prefix from customer ids
+    -- - removes future birthdates
+    -- - standardizes gender values
+    -- =====================================================
+
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.erp_cust_az12;
@@ -160,6 +198,15 @@ BEGIN
     end_time := clock_timestamp();
     RAISE NOTICE 'erp_cust_az12 loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
+
+    -- =====================================================
+    -- ERP LOCATION
+    -- Cleaning:
+    -- - removes hyphens from customer ids
+    -- - standardizes country names
+    -- - fills blanks with n/a
+    -- =====================================================
+
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.erp_loc_a101;
@@ -181,6 +228,12 @@ BEGIN
     end_time := clock_timestamp();
     RAISE NOTICE 'erp_loc_a101 loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
+
+    -- =====================================================
+    -- ERP PRODUCT CATEGORY
+    -- Cleaning:
+    -- - direct load because source already matches target structure
+    -- =====================================================
 
     start_time := clock_timestamp();
 
@@ -213,3 +266,5 @@ EXCEPTION
         RAISE NOTICE 'ERROR: %', SQLERRM;
 END;
 $$;
+
+call silver.load_silver();
