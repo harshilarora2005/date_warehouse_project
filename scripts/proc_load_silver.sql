@@ -8,14 +8,8 @@ DECLARE
     end_time TIMESTAMP;
 BEGIN
     batch_start_time := clock_timestamp();
-
-    RAISE NOTICE '========================================';
     RAISE NOTICE 'Loading Silver Layer Started';
-    RAISE NOTICE '========================================';
 
-    -- ========================================
-    -- CRM CUSTOMER INFO
-    -- ========================================
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.crm_cust_info;
@@ -57,9 +51,6 @@ BEGIN
     RAISE NOTICE 'crm_cust_info loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
 
-    -- ========================================
-    -- CRM PRODUCT INFO
-    -- ========================================
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.crm_prd_info;
@@ -94,10 +85,6 @@ BEGIN
     end_time := clock_timestamp();
     RAISE NOTICE 'crm_prd_info loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
-
-    -- ========================================
-    -- CRM SALES DETAILS
-    -- ========================================
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.crm_sales_details;
@@ -145,10 +132,6 @@ BEGIN
     end_time := clock_timestamp();
     RAISE NOTICE 'crm_sales_details loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
-
-    -- ========================================
-    -- ERP CUSTOMER
-    -- ========================================
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.erp_cust_az12;
@@ -177,10 +160,6 @@ BEGIN
     end_time := clock_timestamp();
     RAISE NOTICE 'erp_cust_az12 loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
-
-    -- ========================================
-    -- ERP LOCATION
-    -- ========================================
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.erp_loc_a101;
@@ -203,9 +182,6 @@ BEGIN
     RAISE NOTICE 'erp_loc_a101 loaded in % seconds', EXTRACT(EPOCH FROM end_time - start_time);
 
 
-    -- ========================================
-    -- ERP PRODUCT CATEGORY
-    -- ========================================
     start_time := clock_timestamp();
 
     TRUNCATE TABLE silver.erp_px_cat_g1v2;
@@ -229,10 +205,8 @@ BEGIN
 
     batch_end_time := clock_timestamp();
 
-    RAISE NOTICE '========================================';
     RAISE NOTICE 'Silver Layer Completed';
     RAISE NOTICE 'Total Duration: % seconds', EXTRACT(EPOCH FROM batch_end_time - batch_start_time);
-    RAISE NOTICE '========================================';
 
 EXCEPTION
     WHEN OTHERS THEN
